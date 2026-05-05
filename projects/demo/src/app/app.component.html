@@ -1,0 +1,112 @@
+<main class="demo" [style.background]="palette.pageBackground">
+  <header class="demo-header">
+    <div>
+      <p class="eyebrow">ngx-document-signer demo</p>
+      <h1>Creator and signer flow</h1>
+    </div>
+    <div class="actions">
+      <button type="button" [class.active]="mode === 'creator'" (click)="mode = 'creator'">Creator</button>
+      <button type="button" [class.active]="mode === 'signer'" (click)="mode = 'signer'" [disabled]="!createdPdf">
+        Signer
+      </button>
+    </div>
+  </header>
+
+  <section class="customizer">
+    <div>
+      <h2>Customization</h2>
+      <p>Switch palettes, hide controls, and trigger component methods from outside.</p>
+    </div>
+    <div class="palette-list">
+      <button
+        type="button"
+        *ngFor="let item of palettes | keyvalue"
+        [class.active]="activePalette === item.key"
+        [style.border-color]="item.value.border"
+        [style.background]="activePalette === item.key ? item.value.accent : item.value.button"
+        [style.color]="activePalette === item.key ? item.value.accentText : item.value.text"
+        (click)="activePalette = item.key">
+        <span class="swatch" [style.background]="item.value.accent"></span>
+        {{ item.value.name }}
+      </button>
+    </div>
+    <label>
+      <input type="checkbox" [(ngModel)]="showCreatorBrowse" />
+      Browse button
+    </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="showCreatorFieldTools" />
+      Field tools
+    </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="showSaveButtons" />
+      Save buttons
+    </label>
+    <div class="programmatic">
+      <button type="button" (click)="openCreatorPicker()">Programmatic browse</button>
+      <button type="button" (click)="saveFromCreator()">Programmatic creator save</button>
+      <button type="button" (click)="saveFromSigner()" [disabled]="!createdPdf">Programmatic signer save</button>
+      <button type="button" (click)="downloadFromSigner()" [disabled]="!createdPdf">Programmatic signer download</button>
+    </div>
+  </section>
+
+  <section class="panel" *ngIf="mode === 'creator'">
+    <div class="panel-header">
+      <div>
+        <h2>Create fields</h2>
+        <p>Browse for a PDF, draw text or signature boxes, then save.</p>
+      </div>
+      <div class="file-actions" *ngIf="createdUrl">
+        <button type="button" (click)="downloadCreatedPdf()">Download created PDF</button>
+        <a [href]="createdUrl" target="_blank" rel="noopener">Open created PDF</a>
+      </div>
+    </div>
+
+    <nds-pdf-creator
+      [showBrowseButton]="showCreatorBrowse"
+      [showAddTextboxButton]="showCreatorFieldTools"
+      [showAddSignatureButton]="showCreatorFieldTools"
+      [showSaveButton]="showSaveButtons"
+      browseBtnLabel="Choose PDF"
+      addTextboxBtnLabel="Add text box"
+      addSignatureBtnLabel="Add signature"
+      saveBtnLabel="Create form PDF"
+      textFieldLabel="Text box"
+      signatureFieldLabel="Signature box"
+      [shellStyle]="shellStyle"
+      [toolbarStyle]="toolbarStyle"
+      [buttonStyle]="buttonStyle"
+      [primaryButtonStyle]="primaryButtonStyle"
+      [activeButtonStyle]="activeButtonStyle"
+      (saved)="handleCreated($event)">
+    </nds-pdf-creator>
+  </section>
+
+  <section class="panel" *ngIf="mode === 'signer'">
+    <div class="panel-header">
+      <div>
+        <h2>Sign the PDF</h2>
+        <p>Fill the fields from the creator step, sign, then save the completed PDF.</p>
+      </div>
+      <div class="file-actions" *ngIf="signedUrl">
+        <button type="button" (click)="downloadSignedPdf()">Download signed PDF</button>
+        <a [href]="signedUrl" target="_blank" rel="noopener">Open signed PDF</a>
+      </div>
+    </div>
+
+    <p class="ready" *ngIf="signedSize">Signed PDF ready: {{ signedSize }}</p>
+    <nds-pdf-signer
+      *ngIf="createdPdf"
+      [source]="createdPdf"
+      [showSaveButton]="showSaveButtons"
+      saveBtnLabel="Finish signing"
+      signatureFieldPlaceholder="Tap to sign"
+      signatureDialogTitle="Draw your signature"
+      [shellStyle]="shellStyle"
+      [toolbarStyle]="toolbarStyle"
+      [buttonStyle]="buttonStyle"
+      [primaryButtonStyle]="primaryButtonStyle"
+      (completed)="handleSigned($event)">
+    </nds-pdf-signer>
+  </section>
+</main>

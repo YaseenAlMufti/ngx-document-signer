@@ -1,0 +1,14 @@
+{
+  "name": "ngx-document-signer",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^19.2.0",
+    "@angular/core": "^19.2.0"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38",
+    "tslib": "^2.3.0"
+  },
+  "sideEffects": false
+}
