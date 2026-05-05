@@ -54,3 +54,16 @@ Most UI outside the PDF preview canvas can be customized with inputs:
 ```
 
 Useful public methods include `openFilePicker()`, `load(source)`, `save()`, and `download(filename)`.
+
+## Angular support
+
+- Use `ngx-document-signer@1.x` for Angular 14-16 projects.
+- Use `ngx-document-signer@2.x` for Angular 17+ projects.
+
+Both release lines expose the same public components and events. The repository keeps release profiles in `release-profiles/` so each major can be built with the correct Angular compiler and peer dependency range.
+
+## License and support
+
+This project is released under the MIT License. Packages and redistributed copies must keep the copyright and license notice, which gives credit to Yaseen Al Mufti.
+
+Donation link: https://github.com/sponsors/yaseenalmufti

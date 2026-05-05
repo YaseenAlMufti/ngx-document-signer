@@ -166,7 +166,7 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PdfSignerComponent implements AfterViewInit, OnChanges {
-  @Input({ required: true }) source!: DocumentSignerSource;
+  @Input() source!: DocumentSignerSource;
   @Input() workerSrc?: string;
   @Input() showToolbar = true;
   @Input() showPageControls = true;

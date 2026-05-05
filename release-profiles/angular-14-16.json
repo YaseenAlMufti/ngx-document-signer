@@ -1,0 +1,63 @@
+{
+  "note": "Run npm install after applying this profile so Angular 14 ng-packagr/compiler versions are installed.",
+  "rootPackage": {
+    "dependencies": {
+      "@angular/common": "^14.2.0",
+      "@angular/compiler": "^14.2.0",
+      "@angular/core": "^14.2.0",
+      "@angular/forms": "^14.2.0",
+      "@angular/platform-browser": "^14.2.0",
+      "@angular/platform-browser-dynamic": "^14.2.0",
+      "@angular/router": "^14.2.0",
+      "pdf-lib": "^1.17.1",
+      "pdfjs-dist": "^4.10.38",
+      "rxjs": "~7.5.0",
+      "tslib": "^2.3.0",
+      "zone.js": "~0.11.4"
+    },
+    "devDependencies": {
+      "@angular-devkit/build-angular": "^14.2.13",
+      "@angular/cli": "^14.2.13",
+      "@angular/compiler-cli": "^14.2.0",
+      "@types/jasmine": "~4.3.0",
+      "jasmine-core": "~4.5.0",
+      "karma": "~6.4.0",
+      "karma-chrome-launcher": "~3.1.0",
+      "karma-coverage": "~2.2.0",
+      "karma-jasmine": "~5.1.0",
+      "karma-jasmine-html-reporter": "~2.0.0",
+      "ng-packagr": "^14.2.2",
+      "typescript": "~4.8.4"
+    },
+    "author": {
+      "name": "Yaseen Al Mufti",
+      "email": "yaseenalmufti@gmail.com"
+    },
+    "license": "MIT",
+    "funding": {
+      "type": "github",
+      "url": "https://github.com/sponsors/yaseenalmufti"
+    }
+  },
+  "libraryPackage": {
+    "version": "1.0.0",
+    "peerDependencies": {
+      "@angular/common": ">=14.0.0 <17.0.0",
+      "@angular/core": ">=14.0.0 <17.0.0"
+    },
+    "dependencies": {
+      "pdf-lib": "^1.17.1",
+      "pdfjs-dist": "^4.10.38",
+      "tslib": "^2.3.0"
+    },
+    "author": {
+      "name": "Yaseen Al Mufti",
+      "email": "yaseenalmufti@gmail.com"
+    },
+    "license": "MIT",
+    "funding": {
+      "type": "github",
+      "url": "https://github.com/sponsors/yaseenalmufti"
+    }
+  }
+}

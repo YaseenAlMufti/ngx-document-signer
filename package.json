@@ -6,6 +6,8 @@
     "start": "ng serve demo",
     "demo": "ng serve demo",
     "build": "ng build ngx-document-signer",
+    "profile:ng14": "node scripts/apply-release-profile.mjs angular-14-16",
+    "profile:ng17": "node scripts/apply-release-profile.mjs angular-17-plus",
     "build:demo": "ng build demo",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -38,5 +40,14 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "ng-packagr": "^19.2.0",
     "typescript": "~5.7.2"
+  },
+  "author": {
+    "name": "Yaseen Al Mufti",
+    "email": "yaseenalmufti@gmail.com"
+  },
+  "license": "MIT",
+  "funding": {
+    "type": "github",
+    "url": "https://github.com/sponsors/yaseenalmufti"
   }
 }
