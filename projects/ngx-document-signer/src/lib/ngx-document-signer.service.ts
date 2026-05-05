@@ -31,7 +31,7 @@ export class NgxDocumentSignerService {
         y: field.y,
         width: field.width,
         height: field.height,
-        borderWidth: 1,
+        borderWidth: field.type === 'date' ? 0 : 1,
         borderColor: field.type === 'signature' ? rgb(0.05, 0.35, 0.7) : rgb(0.2, 0.2, 0.2),
         textColor: rgb(0, 0, 0),
       });
