@@ -77,10 +77,20 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
               [style.top.px]="toViewRect(field).y"
               [style.width.px]="toViewRect(field).width"
               [style.height.px]="toViewRect(field).height">
-              <input class="nds-input" [(ngModel)]="textValues[field.name]" />
-              <button type="button" (click)="setToday(field.name)"
+              <input type="date" class="nds-input" [(ngModel)]="textValues[field.name]" />
+              <button type="button" class="nds-date-today" (click)="setToday(field.name)"
+                [title]="todayBtnTitle"
+                [attr.aria-label]="todayBtnAriaLabel"
                 [ngClass]="buttonClasses('today')"
-                [ngStyle]="buttonStyles('today')">{{ todayBtnLabel }}</button>
+                [ngStyle]="buttonStyles('today')">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 2v4" />
+                  <path d="M16 2v4" />
+                  <path d="M3 10h18" />
+                  <path d="M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+                  <path d="m9 15 2 2 4-5" />
+                </svg>
+              </button>
             </div>
             <button *ngIf="field.type === 'signature'" type="button" class="nds-signature"
               [style.left.px]="toViewRect(field).x"
@@ -154,7 +164,8 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
     .nds-input { padding: 4px 6px; font: 14px Arial, sans-serif; }
     .nds-date { display: flex; overflow: hidden; }
     .nds-date .nds-input { position: static; flex: 1 1 auto; width: 100%; min-width: 0; height: 100%; border: 0; background: transparent; }
-    .nds-date button { flex: 0 0 auto; height: 100%; padding: 0 8px; border-width: 0 0 0 1px; border-radius: 0; background: #f8fafc; }
+    .nds-date-today { flex: 0 0 auto; width: min(36px, 32%); min-width: 28px; height: 100%; display: grid; place-items: center; padding: 0; border-width: 0 0 0 1px; border-radius: 0; background: #f8fafc; }
+    .nds-date-today svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
     .nds-signature { display: block; overflow: hidden; padding: 0; color: #0f766e; font-weight: 700; }
     .nds-signature svg { width: 100%; height: 100%; pointer-events: none; }
     .nds-signature path, .nds-modal-pad path { fill: none; stroke: #111827; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
@@ -193,6 +204,8 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() zoomInBtnLabel = '+';
   @Input() saveBtnLabel = 'Save';
   @Input() todayBtnLabel = 'Today';
+  @Input() todayBtnTitle = 'Use today';
+  @Input() todayBtnAriaLabel = 'Use today';
   @Input() dateValueFormatter: (date: Date) => string = defaultDateValueFormatter;
   @Input() signatureFieldPlaceholder = 'Sign';
   @Input() signatureDialogTitle = 'Signature';

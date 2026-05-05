@@ -49,7 +49,7 @@ Most UI outside the PDF preview canvas can be customized with inputs:
   saveBtnLabel="Finish signing"
   signatureFieldPlaceholder="Tap to sign"
   signatureDialogTitle="Draw your signature"
-  todayBtnLabel="Use today"
+  todayBtnTitle="Use today's date"
   [toolbarStyle]="{ background: '#fff' }"
   [primaryButtonClass]="'my-primary-button'">
 </nds-pdf-signer>
