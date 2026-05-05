@@ -24,6 +24,7 @@ export class AppComponent {
   showCreatorBrowse = true;
   showCreatorFieldTools = true;
   showSaveButtons = true;
+  partialFlattenOnSave = false;
   activePalette = 'teal';
   palettes: Record<string, DemoPalette> = {
     teal: {

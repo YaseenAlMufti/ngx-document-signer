@@ -42,6 +42,10 @@
       <input type="checkbox" [(ngModel)]="showSaveButtons" />
       Save buttons
     </label>
+    <label>
+      <input type="checkbox" [(ngModel)]="partialFlattenOnSave" />
+      Partial flatten
+    </label>
     <div class="programmatic">
       <button type="button" (click)="openCreatorPicker()">Programmatic browse</button>
       <button type="button" (click)="saveFromCreator()">Programmatic creator save</button>
@@ -98,10 +102,12 @@
     </div>
 
     <p class="ready" *ngIf="signedSize">Signed PDF ready: {{ signedSize }}</p>
+    <p class="mode-note">Flatten mode: {{ partialFlattenOnSave ? 'only filled fields' : 'entire form' }}</p>
     <nds-pdf-signer
       *ngIf="createdPdf"
       [source]="createdPdf"
       [showSaveButton]="showSaveButtons"
+      [partialFlattenOnSave]="partialFlattenOnSave"
       saveBtnLabel="Finish signing"
       signatureFieldPlaceholder="Tap to sign"
       signatureDialogTitle="Draw your signature"
