@@ -54,7 +54,7 @@
     <div class="panel-header">
       <div>
         <h2>Create fields</h2>
-        <p>Browse for a PDF, draw text or signature boxes, then save.</p>
+        <p>Browse for a PDF, draw text, date, or signature boxes, then save.</p>
       </div>
       <div class="file-actions" *ngIf="createdUrl">
         <button type="button" (click)="downloadCreatedPdf()">Download created PDF</button>
@@ -66,13 +66,16 @@
       [showBrowseButton]="showCreatorBrowse"
       [showAddTextboxButton]="showCreatorFieldTools"
       [showAddSignatureButton]="showCreatorFieldTools"
+      [showAddDateboxButton]="showCreatorFieldTools"
       [showSaveButton]="showSaveButtons"
       browseBtnLabel="Choose PDF"
       addTextboxBtnLabel="Add text box"
       addSignatureBtnLabel="Add signature"
+      addDateboxBtnLabel="Add date box"
       saveBtnLabel="Create form PDF"
       textFieldLabel="Text box"
       signatureFieldLabel="Signature box"
+      dateFieldLabel="Date box"
       [shellStyle]="shellStyle"
       [toolbarStyle]="toolbarStyle"
       [buttonStyle]="buttonStyle"
@@ -102,6 +105,7 @@
       saveBtnLabel="Finish signing"
       signatureFieldPlaceholder="Tap to sign"
       signatureDialogTitle="Draw your signature"
+      todayBtnLabel="Use today"
       [shellStyle]="shellStyle"
       [toolbarStyle]="toolbarStyle"
       [buttonStyle]="buttonStyle"

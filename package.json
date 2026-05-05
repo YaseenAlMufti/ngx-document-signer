@@ -57,5 +57,19 @@
   "homepage": "https://github.com/YaseenAlMufti/ngx-document-signer#readme",
   "bugs": {
     "url": "https://github.com/YaseenAlMufti/ngx-document-signer/issues"
-  }
+  },
+  "keywords": [
+    "angular",
+    "pdf",
+    "pdf-lib",
+    "pdfjs",
+    "signature",
+    "document-signing",
+    "e-signature",
+    "forms",
+    "acroform",
+    "pdf-forms",
+    "date-field",
+    "ngx"
+  ]
 }

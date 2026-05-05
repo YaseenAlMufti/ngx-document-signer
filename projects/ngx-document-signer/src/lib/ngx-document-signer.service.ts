@@ -136,6 +136,10 @@ export class NgxDocumentSignerService {
       return 'signature';
     }
 
+    if (field.getName().startsWith('nds_date_')) {
+      return 'date';
+    }
+
     if (field instanceof PDFTextField) {
       return 'text';
     }

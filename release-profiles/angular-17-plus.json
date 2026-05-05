@@ -45,10 +45,24 @@
     "homepage": "https://github.com/YaseenAlMufti/ngx-document-signer#readme",
     "bugs": {
       "url": "https://github.com/YaseenAlMufti/ngx-document-signer/issues"
-    }
+    },
+    "keywords": [
+      "angular",
+      "pdf",
+      "pdf-lib",
+      "pdfjs",
+      "signature",
+      "document-signing",
+      "e-signature",
+      "forms",
+      "acroform",
+      "pdf-forms",
+      "date-field",
+      "ngx"
+    ]
   },
   "libraryPackage": {
-    "version": "2.0.3",
+    "version": "2.1.0",
     "peerDependencies": {
       "@angular/common": ">=17.0.0 <21.0.0",
       "@angular/core": ">=17.0.0 <21.0.0"
@@ -74,7 +88,21 @@
     "homepage": "https://github.com/YaseenAlMufti/ngx-document-signer#readme",
     "bugs": {
       "url": "https://github.com/YaseenAlMufti/ngx-document-signer/issues"
-    }
+    },
+    "keywords": [
+      "angular",
+      "pdf",
+      "pdf-lib",
+      "pdfjs",
+      "signature",
+      "document-signing",
+      "e-signature",
+      "forms",
+      "acroform",
+      "pdf-forms",
+      "date-field",
+      "ngx"
+    ]
   },
   "tsconfig": {
     "compilerOptions": {

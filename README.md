@@ -25,6 +25,8 @@ Creator:
 <nds-pdf-creator (saved)="uploadCreatedPdf($event.bytes)"></nds-pdf-creator>
 ```
 
+The creator can place text, date, and signature boxes. Date boxes are saved as PDF text fields with an `nds_date_` prefix so the signer can show a Today button.
+
 Signer:
 
 ```html

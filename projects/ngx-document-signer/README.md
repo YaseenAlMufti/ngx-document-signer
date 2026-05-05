@@ -4,9 +4,9 @@ Reusable Angular PDF creator and signer components.
 
 ## Components
 
-`PdfCreatorComponent` lets a creator browse for a PDF, preview it, page through it, zoom, draw text/signature boxes, and save a new PDF containing AcroForm fields at those coordinates.
+`PdfCreatorComponent` lets a creator browse for a PDF, preview it, page through it, zoom, draw text/date/signature boxes, and save a new PDF containing AcroForm fields at those coordinates.
 
-`PdfSignerComponent` accepts a PDF href, `Blob`, `ArrayBuffer`, or `Uint8Array`, previews the PDF, discovers the creator fields, lets the signer type text or draw a signature, and emits the signed PDF bytes on save.
+`PdfSignerComponent` accepts a PDF href, `Blob`, `ArrayBuffer`, or `Uint8Array`, previews the PDF, discovers the creator fields, lets the signer type text, insert today's date, or draw a signature, and emits the signed PDF bytes on save.
 
 ## Usage
 
@@ -39,6 +39,7 @@ Most UI outside the PDF preview canvas can be customized with inputs:
   browseBtnLabel="Choose PDF"
   addTextboxBtnLabel="Add text box"
   addSignatureBtnLabel="Add signature"
+  addDateboxBtnLabel="Add date"
   [buttonStyle]="{ borderRadius: '999px' }"
   [primaryButtonStyle]="{ background: '#0f766e', color: '#fff' }">
 </nds-pdf-creator>
@@ -48,6 +49,7 @@ Most UI outside the PDF preview canvas can be customized with inputs:
   saveBtnLabel="Finish signing"
   signatureFieldPlaceholder="Tap to sign"
   signatureDialogTitle="Draw your signature"
+  todayBtnLabel="Use today"
   [toolbarStyle]="{ background: '#fff' }"
   [primaryButtonClass]="'my-primary-button'">
 </nds-pdf-signer>

@@ -1,6 +1,6 @@
 export type DocumentSignerSource = string | ArrayBuffer | Uint8Array | Blob;
 
-export type DocumentSignerFieldType = 'text' | 'signature';
+export type DocumentSignerFieldType = 'text' | 'signature' | 'date';
 
 export interface DocumentSignerField {
   id: string;

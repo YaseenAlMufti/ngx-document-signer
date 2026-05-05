@@ -43,6 +43,9 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
         <button *ngIf="showAddSignatureButton" type="button" (click)="setTool('signature')" [class.active]="tool === 'signature'"
           [ngClass]="buttonClasses('signature')"
           [ngStyle]="buttonStyles('signature')">{{ addSignatureBtnLabel }}</button>
+        <button *ngIf="showAddDateboxButton" type="button" (click)="setTool('date')" [class.active]="tool === 'date'"
+          [ngClass]="buttonClasses('date')"
+          [ngStyle]="buttonStyles('date')">{{ addDateboxBtnLabel }}</button>
         <span class="nds-spacer"></span>
         <ng-container *ngIf="showPageControls">
           <button type="button" (click)="previousPage()" [disabled]="pageIndex === 0"
@@ -79,11 +82,12 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
             *ngFor="let field of visibleFields"
             class="nds-field"
             [class.signature]="field.type === 'signature'"
+            [class.date]="field.type === 'date'"
             [style.left.px]="toViewRect(field).x"
             [style.top.px]="toViewRect(field).y"
             [style.width.px]="toViewRect(field).width"
             [style.height.px]="toViewRect(field).height">
-            {{ field.type === 'signature' ? signatureFieldLabel : textFieldLabel }}
+            {{ fieldLabel(field) }}
             <button *ngIf="showRemoveFieldButton" type="button" [title]="removeFieldBtnTitle" (click)="removeField(field.id)"
               [ngClass]="buttonClasses('remove')"
               [ngStyle]="buttonStyles('remove')">{{ removeFieldBtnLabel }}</button>
@@ -113,6 +117,7 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
     canvas { display: block; }
     .nds-field { position: absolute; display: flex; align-items: center; justify-content: center; min-width: 24px; min-height: 18px; border: 2px solid #374151; background: rgba(255,255,255,.35); color: #111827; font-size: 12px; }
     .nds-field.signature { border-color: #0f766e; color: #0f766e; }
+    .nds-field.date { border-color: #7c3aed; color: #5b21b6; }
     .nds-field.draft { pointer-events: none; border-style: dashed; }
     .nds-field button { position: absolute; top: -12px; right: -12px; width: 22px; height: 22px; padding: 0; border-radius: 50%; line-height: 1; }
     .nds-empty { padding: 48px 16px; text-align: center; color: #64748b; }
@@ -126,6 +131,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   @Input() showBrowseButton = true;
   @Input() showAddTextboxButton = true;
   @Input() showAddSignatureButton = true;
+  @Input() showAddDateboxButton = true;
   @Input() showPageControls = true;
   @Input() showPageIndicator = true;
   @Input() showZoomControls = true;
@@ -135,6 +141,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   @Input() browseBtnLabel = 'Browse';
   @Input() addTextboxBtnLabel = 'Text';
   @Input() addSignatureBtnLabel = 'Signature';
+  @Input() addDateboxBtnLabel = 'Date';
   @Input() previousPageBtnLabel = 'Previous';
   @Input() nextPageBtnLabel = 'Next';
   @Input() zoomOutBtnLabel = '-';
@@ -144,6 +151,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   @Input() removeFieldBtnTitle = 'Remove field';
   @Input() textFieldLabel = 'Text';
   @Input() signatureFieldLabel = 'Signature';
+  @Input() dateFieldLabel = 'Date';
   @Input() emptyStateText = 'Choose a PDF to begin.';
   @Input() shellClass?: DocumentSignerClassValue;
   @Input() toolbarClass?: DocumentSignerClassValue;
@@ -155,6 +163,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   @Input() browseButtonClass?: DocumentSignerClassValue;
   @Input() addTextboxButtonClass?: DocumentSignerClassValue;
   @Input() addSignatureButtonClass?: DocumentSignerClassValue;
+  @Input() addDateboxButtonClass?: DocumentSignerClassValue;
   @Input() previousPageButtonClass?: DocumentSignerClassValue;
   @Input() nextPageButtonClass?: DocumentSignerClassValue;
   @Input() zoomOutButtonClass?: DocumentSignerClassValue;
@@ -173,6 +182,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   @Input() browseButtonStyle?: DocumentSignerStyleValue;
   @Input() addTextboxButtonStyle?: DocumentSignerStyleValue;
   @Input() addSignatureButtonStyle?: DocumentSignerStyleValue;
+  @Input() addDateboxButtonStyle?: DocumentSignerStyleValue;
   @Input() previousPageButtonStyle?: DocumentSignerStyleValue;
   @Input() nextPageButtonStyle?: DocumentSignerStyleValue;
   @Input() zoomOutButtonStyle?: DocumentSignerStyleValue;
@@ -327,6 +337,18 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
     }
   }
 
+  fieldLabel(field: DocumentSignerField): string {
+    if (field.type === 'signature') {
+      return this.signatureFieldLabel;
+    }
+
+    if (field.type === 'date') {
+      return this.dateFieldLabel;
+    }
+
+    return this.textFieldLabel;
+  }
+
   buttonClasses(button: CreatorButtonName): DocumentSignerClassValue[] {
     const specific = this.buttonClassFor(button);
     const classes: DocumentSignerClassValue[] = [];
@@ -347,7 +369,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   }
 
   private isActiveButton(button: CreatorButtonName): boolean {
-    return (button === 'text' && this.tool === 'text') || (button === 'signature' && this.tool === 'signature');
+    return (button === 'text' && this.tool === 'text') || (button === 'signature' && this.tool === 'signature') || (button === 'date' && this.tool === 'date');
   }
 
   private buttonClassFor(button: CreatorButtonName): DocumentSignerClassValue | undefined {
@@ -355,6 +377,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
       browse: this.browseButtonClass,
       text: this.addTextboxButtonClass,
       signature: this.addSignatureButtonClass,
+      date: this.addDateboxButtonClass,
       previous: this.previousPageButtonClass,
       next: this.nextPageButtonClass,
       zoomOut: this.zoomOutButtonClass,
@@ -369,6 +392,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
       browse: this.browseButtonStyle,
       text: this.addTextboxButtonStyle,
       signature: this.addSignatureButtonStyle,
+      date: this.addDateboxButtonStyle,
       previous: this.previousPageButtonStyle,
       next: this.nextPageButtonStyle,
       zoomOut: this.zoomOutButtonStyle,
@@ -445,7 +469,7 @@ function normalizeRect(start: Point, end: Point): Rect {
   return { x, y, width: Math.abs(end.x - start.x), height: Math.abs(end.y - start.y) };
 }
 
-type CreatorButtonName = 'browse' | 'text' | 'signature' | 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'remove';
+type CreatorButtonName = 'browse' | 'text' | 'signature' | 'date' | 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'remove';
 
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);

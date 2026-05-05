@@ -5,6 +5,7 @@ import { DocumentSignerCompletedEvent, DocumentSignerSaveEvent, PdfCreatorCompon
 
 @Component({
   selector: 'app-root',
+  standalone: true,
   imports: [CommonModule, FormsModule, PdfCreatorComponent, PdfSignerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'

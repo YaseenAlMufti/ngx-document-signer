@@ -72,6 +72,16 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
               [style.width.px]="toViewRect(field).width"
               [style.height.px]="toViewRect(field).height"
               [(ngModel)]="textValues[field.name]" />
+            <div *ngIf="field.type === 'date'" class="nds-date"
+              [style.left.px]="toViewRect(field).x"
+              [style.top.px]="toViewRect(field).y"
+              [style.width.px]="toViewRect(field).width"
+              [style.height.px]="toViewRect(field).height">
+              <input class="nds-input" [(ngModel)]="textValues[field.name]" />
+              <button type="button" (click)="setToday(field.name)"
+                [ngClass]="buttonClasses('today')"
+                [ngStyle]="buttonStyles('today')">{{ todayBtnLabel }}</button>
+            </div>
             <button *ngIf="field.type === 'signature'" type="button" class="nds-signature"
               [style.left.px]="toViewRect(field).x"
               [style.top.px]="toViewRect(field).y"
@@ -140,8 +150,11 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
     .nds-stage { overflow: auto; padding: 18px; max-height: 75vh; }
     .nds-page { position: relative; margin: 0 auto; box-shadow: 0 10px 28px rgba(15, 23, 42, .2); background: white; }
     canvas { display: block; }
-    .nds-input, .nds-signature { position: absolute; box-sizing: border-box; border: 2px solid #0f766e; background: rgba(255,255,255,.72); }
+    .nds-input, .nds-signature, .nds-date { position: absolute; box-sizing: border-box; border: 2px solid #0f766e; background: rgba(255,255,255,.72); }
     .nds-input { padding: 4px 6px; font: 14px Arial, sans-serif; }
+    .nds-date { display: flex; overflow: hidden; }
+    .nds-date .nds-input { position: static; flex: 1 1 auto; width: 100%; min-width: 0; height: 100%; border: 0; background: transparent; }
+    .nds-date button { flex: 0 0 auto; height: 100%; padding: 0 8px; border-width: 0 0 0 1px; border-radius: 0; background: #f8fafc; }
     .nds-signature { display: block; overflow: hidden; padding: 0; color: #0f766e; font-weight: 700; }
     .nds-signature svg { width: 100%; height: 100%; pointer-events: none; }
     .nds-signature path, .nds-modal-pad path { fill: none; stroke: #111827; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
@@ -179,6 +192,8 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() zoomOutBtnLabel = '-';
   @Input() zoomInBtnLabel = '+';
   @Input() saveBtnLabel = 'Save';
+  @Input() todayBtnLabel = 'Today';
+  @Input() dateValueFormatter: (date: Date) => string = defaultDateValueFormatter;
   @Input() signatureFieldPlaceholder = 'Sign';
   @Input() signatureDialogTitle = 'Signature';
   @Input() signatureDialogAriaLabel = 'Draw signature';
@@ -196,6 +211,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() zoomOutButtonClass?: DocumentSignerClassValue;
   @Input() zoomInButtonClass?: DocumentSignerClassValue;
   @Input() saveButtonClass?: DocumentSignerClassValue;
+  @Input() todayButtonClass?: DocumentSignerClassValue;
   @Input() acceptSignatureButtonClass?: DocumentSignerClassValue;
   @Input() clearSignatureButtonClass?: DocumentSignerClassValue;
   @Input() pageIndicatorClass?: DocumentSignerClassValue;
@@ -215,6 +231,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() zoomOutButtonStyle?: DocumentSignerStyleValue;
   @Input() zoomInButtonStyle?: DocumentSignerStyleValue;
   @Input() saveButtonStyle?: DocumentSignerStyleValue;
+  @Input() todayButtonStyle?: DocumentSignerStyleValue;
   @Input() acceptSignatureButtonStyle?: DocumentSignerStyleValue;
   @Input() clearSignatureButtonStyle?: DocumentSignerStyleValue;
   @Input() pageIndicatorStyle?: DocumentSignerStyleValue;
@@ -353,9 +370,16 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
     this.closeSignatureDialog();
   }
 
+  setToday(fieldName: string): void {
+    this.textValues = {
+      ...this.textValues,
+      [fieldName]: this.dateValueFormatter(new Date()),
+    };
+  }
+
   async save(): Promise<DocumentSignerCompletedEvent> {
     const texts: DocumentSignerTextValue[] = this.fields
-      .filter((field) => field.type === 'text')
+      .filter((field) => field.type === 'text' || field.type === 'date')
       .map((field) => ({ fieldName: field.name, value: this.textValues[field.name] ?? '' }));
     const signatures = await Promise.all(this.fields
       .filter((field) => field.type === 'signature')
@@ -422,6 +446,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
       save: this.saveButtonClass,
       acceptSignature: this.acceptSignatureButtonClass,
       clearSignature: this.clearSignatureButtonClass,
+      today: this.todayButtonClass,
     }[button];
   }
 
@@ -434,6 +459,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
       save: this.saveButtonStyle,
       acceptSignature: this.acceptSignatureButtonStyle,
       clearSignature: this.clearSignatureButtonStyle,
+      today: this.todayButtonStyle,
     }[button];
   }
 
@@ -443,7 +469,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
     }
     this.document = await loadPdfDocument(this.source, this.workerSrc);
     this.fields = await this.signer.extractFields(this.source);
-    this.textValues = Object.fromEntries(this.fields.filter((field) => field.type === 'text').map((field) => [field.name, field.value ?? '']));
+    this.textValues = Object.fromEntries(this.fields.filter((field) => field.type === 'text' || field.type === 'date').map((field) => [field.name, field.value ?? '']));
     this.signatureDrawings = {};
     this.pageCount = this.document.numPages;
     this.pageIndex = 0;
@@ -585,7 +611,14 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
-type SignerButtonName = 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'acceptSignature' | 'clearSignature';
+type SignerButtonName = 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'today' | 'acceptSignature' | 'clearSignature';
+
+function defaultDateValueFormatter(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
 
 function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
