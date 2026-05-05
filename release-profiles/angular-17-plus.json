@@ -37,10 +37,18 @@
     "funding": {
       "type": "github",
       "url": "https://github.com/sponsors/yaseenalmufti"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/YaseenAlMufti/ngx-document-signer.git"
+    },
+    "homepage": "https://github.com/YaseenAlMufti/ngx-document-signer#readme",
+    "bugs": {
+      "url": "https://github.com/YaseenAlMufti/ngx-document-signer/issues"
     }
   },
   "libraryPackage": {
-    "version": "2.0.0",
+    "version": "2.0.1",
     "peerDependencies": {
       "@angular/common": ">=17.0.0 <21.0.0",
       "@angular/core": ">=17.0.0 <21.0.0"
@@ -58,6 +66,19 @@
     "funding": {
       "type": "github",
       "url": "https://github.com/sponsors/yaseenalmufti"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/YaseenAlMufti/ngx-document-signer.git"
+    },
+    "homepage": "https://github.com/YaseenAlMufti/ngx-document-signer#readme",
+    "bugs": {
+      "url": "https://github.com/YaseenAlMufti/ngx-document-signer/issues"
+    }
+  },
+  "tsconfig": {
+    "compilerOptions": {
+      "moduleResolution": "bundler"
     }
   }
 }

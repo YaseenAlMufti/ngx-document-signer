@@ -26,8 +26,25 @@ function applyPackagePatch(filePath, patch) {
   writeFileSync(absolutePath, JSON.stringify(nextPackageJson, null, 2) + "\n");
 }
 
+function applyTsconfigPatch(filePath, patch) {
+  if (!patch) {
+    return;
+  }
+
+  const absolutePath = resolve(root, filePath);
+  let content = readFileSync(absolutePath, "utf8");
+
+  for (const [key, value] of Object.entries(patch.compilerOptions ?? {})) {
+    const pattern = new RegExp('"' + key + '"\\s*:\\s*"[^"]+"');
+    content = content.replace(pattern, '"' + key + '": "' + value + '"');
+  }
+
+  writeFileSync(absolutePath, content);
+}
+
 applyPackagePatch("package.json", profile.rootPackage);
 applyPackagePatch("projects/ngx-document-signer/package.json", profile.libraryPackage);
+applyTsconfigPatch("tsconfig.json", profile.tsconfig);
 
 console.log("Applied " + profileName + " release profile.");
 console.log(profile.note);
