@@ -57,6 +57,19 @@ Most UI outside the PDF preview canvas can be customized with inputs:
 
 Useful public methods include `openFilePicker()`, `load(source)`, `save()`, and `download(filename)`.
 
+## Date fields
+
+Creator date boxes are saved as PDF text fields with an `nds_date_` prefix. The signer renders those fields as native `input type="date"` controls with a compact icon button for today's date.
+
+The browser input value uses the native ISO format `YYYY-MM-DD`. When the signed PDF is saved, the default PDF value is formatted as US-style `MM/DD/YYYY`, and generated date fields are borderless in the final PDF. Override `datePdfValueFormatter` if your project needs a different saved date format:
+
+```html
+<nds-pdf-signer
+  [source]="createdPdf"
+  [datePdfValueFormatter]="formatDateForPdf">
+</nds-pdf-signer>
+```
+
 ## Angular support
 
 - Use `ngx-document-signer@1.x` for Angular 14-16 projects.

@@ -27,6 +27,8 @@ Creator:
 
 The creator can place text, date, and signature boxes. Date boxes are saved as PDF text fields with an `nds_date_` prefix so the signer can show a Today button.
 
+Date boxes render as native `input type="date"` controls on the signer. They keep the browser's `YYYY-MM-DD` value internally, but the saved PDF defaults to US-style `MM/DD/YYYY`; generated date fields are borderless in the final PDF.
+
 Signer:
 
 ```html
