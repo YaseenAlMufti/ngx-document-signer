@@ -10,10 +10,14 @@ export async function getPdfJs(workerSrc?: string): Promise<typeof import('pdfjs
   if (workerSrc) {
     pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
   } else if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).toString();
+    pdfjs.GlobalWorkerOptions.workerSrc = defaultWorkerSrc(pdfjs.version);
   }
 
   return pdfjs;
+}
+
+function defaultWorkerSrc(version: string): string {
+  return `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
 }
 
 export async function sourceToBytes(source: DocumentSignerSource): Promise<Uint8Array> {

@@ -67,3 +67,26 @@ Both release lines expose the same public components and events. The repository 
 This project is released under the MIT License. Packages and redistributed copies must keep the copyright and license notice, which gives credit to Yaseen Al Mufti.
 
 Donation link: https://github.com/sponsors/yaseenalmufti
+
+## PDF.js worker
+
+By default, `ngx-document-signer` loads the matching PDF.js worker from the unpkg CDN when you do not pass `workerSrc`:
+
+```text
+https://unpkg.com/pdfjs-dist@<pdfjs-version>/build/pdf.worker.min.mjs
+```
+
+This default avoids broken `file://node_modules` worker URLs in older Angular/Webpack projects, but it also means the browser may fetch a runtime asset from a third-party CDN.
+
+For CSP-restricted, offline, private-network, or compliance-sensitive apps, self-host the worker and pass a browser-accessible URL:
+
+```html
+<nds-pdf-creator [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'"></nds-pdf-creator>
+
+<nds-pdf-signer
+  [source]="pdfSource"
+  [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'">
+</nds-pdf-signer>
+```
+
+For Angular CLI apps, copy `node_modules/pdfjs-dist/build/pdf.worker.min.mjs` into your app assets during the build and point `workerSrc` at that served asset.

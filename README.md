@@ -47,3 +47,26 @@ Use `npm run profile:ng14` or `npm run profile:ng17` before installing dependenc
 This project is released under the MIT License. Packages and redistributed copies must keep the copyright and license notice, which gives credit to Yaseen Al Mufti.
 
 Donation link: https://github.com/sponsors/yaseenalmufti
+
+## PDF.js worker
+
+By default, `ngx-document-signer` loads the matching PDF.js worker from the unpkg CDN when you do not pass `workerSrc`:
+
+```text
+https://unpkg.com/pdfjs-dist@<pdfjs-version>/build/pdf.worker.min.mjs
+```
+
+This keeps the package working in Angular projects where bundlers do not rewrite PDF.js worker imports correctly, including older Angular builds. It does mean the browser may fetch the worker from a third-party CDN at runtime.
+
+If your project has CSP restrictions, offline requirements, private-network requirements, compliance review, or a policy against third-party runtime assets, host the worker yourself and pass a browser-accessible URL:
+
+```html
+<nds-pdf-creator [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'"></nds-pdf-creator>
+
+<nds-pdf-signer
+  [source]="pdfSource"
+  [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'">
+</nds-pdf-signer>
+```
+
+For Angular CLI apps, one common approach is to copy `node_modules/pdfjs-dist/build/pdf.worker.min.mjs` into your app assets during the build and point `workerSrc` at that served asset.
