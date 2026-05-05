@@ -35,6 +35,7 @@ export class NgxDocumentSignerService {
         borderColor: field.type === 'signature' ? rgb(0.05, 0.35, 0.7) : rgb(0.2, 0.2, 0.2),
         textColor: rgb(0, 0, 0),
       });
+      this.setTextFieldFontSize(pdfField, field.height);
       existingFieldNames.add(field.name);
     }
 
@@ -49,15 +50,17 @@ export class NgxDocumentSignerService {
     const bytes = await sourceToBytes(source);
     const document = await PDFDocument.load(bytes);
     const form = document.getForm();
+    const fields = this.extractFieldsFromDocument(document);
 
     for (const item of textValues) {
       const field = form.getField(item.fieldName);
       if (field instanceof PDFTextField) {
         field.setText(item.value);
+        const signerField = fields.find((candidate) => candidate.name === item.fieldName);
+        this.setTextFieldFontSize(field, signerField?.height);
       }
     }
 
-    const fields = this.extractFieldsFromDocument(document);
     for (const item of signatureValues) {
       const field = fields.find((candidate) => candidate.name === item.fieldName);
       if (!field || !item.dataUrl) {
@@ -98,6 +101,15 @@ export class NgxDocumentSignerService {
 
   createBlob(bytes: Uint8Array): Blob {
     return new Blob([bytes], { type: 'application/pdf' });
+  }
+
+  private setTextFieldFontSize(field: PDFTextField, fieldHeight?: number): void {
+    const fontSize = Math.max(8, Math.min(12, Math.floor((fieldHeight ?? 24) * 0.45)));
+    try {
+      field.setFontSize(fontSize);
+    } catch {
+      // Some existing PDFs omit a default appearance. pdf-lib can still regenerate one on save.
+    }
   }
 
   private extractFieldsFromDocument(document: PDFDocument): DocumentSignerField[] {

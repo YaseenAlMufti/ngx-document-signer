@@ -207,6 +207,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() todayBtnTitle = 'Use today';
   @Input() todayBtnAriaLabel = 'Use today';
   @Input() dateValueFormatter: (date: Date) => string = defaultDateValueFormatter;
+  @Input() datePdfValueFormatter: (value: string) => string = defaultDatePdfValueFormatter;
   @Input() signatureFieldPlaceholder = 'Sign';
   @Input() signatureDialogTitle = 'Signature';
   @Input() signatureDialogAriaLabel = 'Draw signature';
@@ -393,7 +394,12 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   async save(): Promise<DocumentSignerCompletedEvent> {
     const texts: DocumentSignerTextValue[] = this.fields
       .filter((field) => field.type === 'text' || field.type === 'date')
-      .map((field) => ({ fieldName: field.name, value: this.textValues[field.name] ?? '' }));
+      .map((field) => ({
+        fieldName: field.name,
+        value: field.type === 'date'
+          ? this.datePdfValueFormatter(this.textValues[field.name] ?? '')
+          : this.textValues[field.name] ?? '',
+      }));
     const signatures = await Promise.all(this.fields
       .filter((field) => field.type === 'signature')
       .filter((field) => this.signatureDrawings[field.name])
@@ -631,6 +637,11 @@ function defaultDateValueFormatter(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
   return year + '-' + month + '-' + day;
+}
+
+function defaultDatePdfValueFormatter(value: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return match ? match[2] + '/' + match[3] + '/' + match[1] : value;
 }
 
 function downloadBlob(blob: Blob, filename: string): void {
