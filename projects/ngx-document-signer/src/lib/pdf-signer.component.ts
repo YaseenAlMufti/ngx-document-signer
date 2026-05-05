@@ -198,6 +198,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() showZoomControls = true;
   @Input() showZoomIndicator = true;
   @Input() showSaveButton = true;
+  @Input() partialFlattenOnSave = false;
   @Input() previousPageBtnLabel = 'Previous';
   @Input() nextPageBtnLabel = 'Next';
   @Input() zoomOutBtnLabel = '-';
@@ -407,7 +408,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
         fieldName: field.name,
         dataUrl: await drawingToPng(this.signatureDrawings[field.name]),
       })));
-    const bytes = await this.signer.fillPdf(this.source, texts, signatures);
+    const bytes = await this.signer.fillPdf(this.source, texts, signatures, { partialFlatten: this.partialFlattenOnSave });
     const event = { bytes, blob: this.signer.createBlob(bytes) };
     this.completed.emit(event);
     return event;

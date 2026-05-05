@@ -37,6 +37,8 @@ Signer:
 
 `source` accepts an href, `Blob`, `ArrayBuffer`, or `Uint8Array`.
 
+Signer saves flatten the whole form by default. Set `[partialFlattenOnSave]="true"` to flatten only fields that have signer-provided values, leaving empty fields editable.
+
 ## Angular release lines
 
 This package is intended to publish two npm major lines from the same source:

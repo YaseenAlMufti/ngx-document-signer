@@ -1,7 +1,22 @@
 import { Injectable } from '@angular/core';
-import { PDFDocument, PDFField, PDFPage, PDFSignature, PDFTextField, rgb } from 'pdf-lib';
+import {
+  drawObject,
+  PDFDocument,
+  PDFField,
+  PDFForm,
+  PDFPage,
+  PDFRef,
+  PDFSignature,
+  PDFTextField,
+  popGraphicsState,
+  pushGraphicsState,
+  rgb,
+  rotateInPlace,
+  translate,
+} from 'pdf-lib';
 import {
   DocumentSignerField,
+  DocumentSignerFillOptions,
   DocumentSignerSignatureValue,
   DocumentSignerSource,
   DocumentSignerTextValue,
@@ -46,11 +61,13 @@ export class NgxDocumentSignerService {
     source: DocumentSignerSource,
     textValues: DocumentSignerTextValue[],
     signatureValues: DocumentSignerSignatureValue[],
+    options: DocumentSignerFillOptions = {},
   ): Promise<Uint8Array> {
     const bytes = await sourceToBytes(source);
     const document = await PDFDocument.load(bytes);
     const form = document.getForm();
     const fields = this.extractFieldsFromDocument(document);
+    const fieldsToFlatten = new Set<string>();
 
     for (const item of textValues) {
       const field = form.getField(item.fieldName);
@@ -58,6 +75,9 @@ export class NgxDocumentSignerService {
         field.setText(item.value);
         const signerField = fields.find((candidate) => candidate.name === item.fieldName);
         this.setTextFieldFontSize(field, signerField?.height);
+        if (item.value.trim()) {
+          fieldsToFlatten.add(item.fieldName);
+        }
       }
     }
 
@@ -87,9 +107,14 @@ export class NgxDocumentSignerService {
       if (formField instanceof PDFTextField) {
         formField.setText('Signed');
       }
+      fieldsToFlatten.add(field.name);
     }
 
-    form.flatten();
+    if (options.partialFlatten) {
+      this.flattenFields(form, fieldsToFlatten);
+    } else {
+      form.flatten();
+    }
     return document.save();
   }
 
@@ -101,6 +126,42 @@ export class NgxDocumentSignerService {
 
   createBlob(bytes: Uint8Array): Blob {
     return new Blob([bytes], { type: 'application/pdf' });
+  }
+
+  private flattenFields(form: PDFForm, fieldNames: Set<string>): void {
+    if (fieldNames.size === 0) {
+      return;
+    }
+
+    form.updateFieldAppearances();
+    const formApi = form as unknown as {
+      findWidgetPage: (widget: unknown) => PDFPage;
+      findWidgetAppearanceRef: (field: PDFField, widget: unknown) => PDFRef;
+    };
+
+    for (const field of form.getFields()) {
+      if (!fieldNames.has(field.getName())) {
+        continue;
+      }
+
+      for (const widget of field.acroField.getWidgets()) {
+        const page = formApi.findWidgetPage(widget);
+        const widgetRef = formApi.findWidgetAppearanceRef(field, widget);
+        const xObjectKey = page.node.newXObject('FlatWidget', widgetRef);
+        const rectangle = widget.getRectangle();
+        page.pushOperators(
+          ...[
+            pushGraphicsState(),
+            translate(rectangle.x, rectangle.y),
+            ...rotateInPlace({ ...rectangle, rotation: 0 }),
+            drawObject(xObjectKey),
+            popGraphicsState(),
+          ].filter(Boolean),
+        );
+      }
+
+      form.removeField(field);
+    }
   }
 
   private setTextFieldFontSize(field: PDFTextField, fieldHeight?: number): void {

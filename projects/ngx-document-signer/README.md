@@ -57,6 +57,19 @@ Most UI outside the PDF preview canvas can be customized with inputs:
 
 Useful public methods include `openFilePicker()`, `load(source)`, `save()`, and `download(filename)`.
 
+## Flattening behavior
+
+By default, signer saves flatten the entire PDF form so completed documents are no longer editable. If your workflow needs untouched fields to remain editable, enable partial flattening:
+
+```html
+<nds-pdf-signer
+  [source]="createdPdf"
+  [partialFlattenOnSave]="true">
+</nds-pdf-signer>
+```
+
+When `partialFlattenOnSave` is enabled, only fields with signer-provided values are flattened. Empty text/date fields and unsigned signature fields remain as editable form fields.
+
 ## Date fields
 
 Creator date boxes are saved as PDF text fields with an `nds_date_` prefix. The signer renders those fields as native `input type="date"` controls with a compact icon button for today's date.
