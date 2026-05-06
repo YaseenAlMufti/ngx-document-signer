@@ -17,7 +17,9 @@ export async function getPdfJs(workerSrc?: string): Promise<typeof import('pdfjs
 }
 
 function defaultWorkerSrc(version: string): string {
-  return `https://unpkg.com/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
+  const majorVersion = Number(version.split('.')[0]);
+  const workerFile = majorVersion >= 4 ? 'pdf.worker.min.mjs' : 'pdf.worker.min.js';
+  return `https://unpkg.com/pdfjs-dist@${version}/build/${workerFile}`;
 }
 
 export async function sourceToBytes(source: DocumentSignerSource): Promise<Uint8Array> {

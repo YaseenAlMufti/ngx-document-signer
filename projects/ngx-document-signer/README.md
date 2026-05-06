@@ -101,6 +101,10 @@ Donation link: https://github.com/sponsors/yaseenalmufti
 By default, `ngx-document-signer` loads the matching PDF.js worker from the unpkg CDN when you do not pass `workerSrc`:
 
 ```text
+Angular 14-16 / ngx-document-signer@1.x:
+https://unpkg.com/pdfjs-dist@<pdfjs-version>/build/pdf.worker.min.js
+
+Angular 17+ / ngx-document-signer@2.x:
 https://unpkg.com/pdfjs-dist@<pdfjs-version>/build/pdf.worker.min.mjs
 ```
 
@@ -109,12 +113,12 @@ This default avoids broken `file://node_modules` worker URLs in older Angular/We
 For CSP-restricted, offline, private-network, or compliance-sensitive apps, self-host the worker and pass a browser-accessible URL:
 
 ```html
-<nds-pdf-creator [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'"></nds-pdf-creator>
+<nds-pdf-creator [workerSrc]="'assets/pdfjs/pdf.worker.min.js'"></nds-pdf-creator>
 
 <nds-pdf-signer
   [source]="pdfSource"
-  [workerSrc]="'assets/pdfjs/pdf.worker.min.mjs'">
+  [workerSrc]="'assets/pdfjs/pdf.worker.min.js'">
 </nds-pdf-signer>
 ```
 
-For Angular CLI apps, copy `node_modules/pdfjs-dist/build/pdf.worker.min.mjs` into your app assets during the build and point `workerSrc` at that served asset.
+For Angular CLI apps, copy the matching worker from `node_modules/pdfjs-dist/build/` into your app assets during the build and point `workerSrc` at that served asset. Use `pdf.worker.min.js` with the Angular 14-16 package line and `pdf.worker.min.mjs` with the Angular 17+ package line.
