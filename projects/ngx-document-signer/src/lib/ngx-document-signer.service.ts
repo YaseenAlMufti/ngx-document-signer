@@ -31,6 +31,14 @@ export class NgxDocumentSignerService {
     const bytes = await sourceToBytes(source);
     const document = await PDFDocument.load(bytes);
     const form = document.getForm();
+    const requestedFieldNames = new Set(fields.map((field) => field.name));
+
+    for (const field of form.getFields()) {
+      if (this.supportedFieldType(field) && !requestedFieldNames.has(field.getName())) {
+        form.removeField(field);
+      }
+    }
+
     const existingFieldNames = new Set(form.getFields().map((field) => field.getName()));
 
     for (const field of fields) {
