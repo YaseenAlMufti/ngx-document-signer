@@ -8,6 +8,10 @@
     "build": "ng build ngx-document-signer",
     "profile:ng14": "node scripts/apply-release-profile.mjs angular-14-16",
     "profile:ng17": "node scripts/apply-release-profile.mjs angular-17-plus",
+    "release:legacy": "node scripts/release-package.mjs angular-14-16",
+    "release:ng17": "node scripts/release-package.mjs angular-17-plus",
+    "publish:legacy": "node scripts/release-package.mjs angular-14-16 --publish",
+    "publish:ng17": "node scripts/release-package.mjs angular-17-plus --publish",
     "build:demo": "ng build demo",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
