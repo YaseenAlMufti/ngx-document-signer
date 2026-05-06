@@ -35,7 +35,7 @@ export class NgxDocumentSignerService {
 
     for (const field of form.getFields()) {
       if (this.supportedFieldType(field) && !requestedFieldNames.has(field.getName())) {
-        form.removeField(field);
+        this.removeField(form, field);
       }
     }
 
@@ -134,6 +134,65 @@ export class NgxDocumentSignerService {
 
   createBlob(bytes: Uint8Array): Blob {
     return new Blob([bytes], { type: 'application/pdf' });
+  }
+
+  private removeField(form: PDFForm, field: PDFField): void {
+    try {
+      form.removeField(field);
+    } catch (error) {
+      if (!this.isAppearanceRemovalError(error)) {
+        throw error;
+      }
+
+      this.removeFieldWithoutAppearance(form, field);
+    }
+  }
+
+  private removeFieldWithoutAppearance(form: PDFForm, field: PDFField): void {
+    const formApi = form as unknown as {
+      doc: {
+        context: {
+          getObjectRef: (object: unknown) => PDFRef | undefined;
+          delete: (ref: PDFRef) => boolean;
+        };
+      };
+      acroForm: {
+        removeField: (field: unknown) => void;
+      };
+      findWidgetPage: (widget: unknown) => PDFPage;
+    };
+    const pages = new Set<PDFPage>();
+
+    for (const widget of field.acroField.getWidgets()) {
+      const widgetRef = formApi.doc.context.getObjectRef((widget as { dict: unknown }).dict);
+      const page = formApi.findWidgetPage(widget);
+      pages.add(page);
+
+      if (widgetRef) {
+        page.node.removeAnnot(widgetRef);
+      }
+    }
+
+    for (const page of pages) {
+      page.node.removeAnnot(field.ref);
+    }
+
+    formApi.acroForm.removeField(field.acroField);
+
+    const fieldKids = field.acroField.normalizedEntries().Kids;
+    for (let childIndex = 0; childIndex < fieldKids.size(); childIndex += 1) {
+      const child = fieldKids.get(childIndex);
+      if (child instanceof PDFRef) {
+        formApi.doc.context.delete(child);
+      }
+    }
+
+    formApi.doc.context.delete(field.ref);
+  }
+
+  private isAppearanceRemovalError(error: unknown): boolean {
+    return error instanceof Error
+      && (error.message.startsWith('Unexpected N type') || error.message.startsWith('Failed to extract appearance ref'));
   }
 
   private flattenFields(form: PDFForm, fieldNames: Set<string>): void {
