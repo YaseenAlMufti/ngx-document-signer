@@ -210,6 +210,8 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   private pageWidth = 0;
   private pageHeight = 0;
   private drawStart?: Point;
+  private pendingSource?: DocumentSignerSource;
+  private viewInitialized = false;
 
   constructor(private signer: NgxDocumentSignerService, private cdr: ChangeDetectorRef) {}
 
@@ -218,14 +220,18 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   }
 
   async ngAfterViewInit(): Promise<void> {
-    if (this.pdf) {
-      await this.open(this.pdf);
+    this.viewInitialized = true;
+    const source = this.pendingSource ?? this.pdf;
+    this.pendingSource = undefined;
+
+    if (source) {
+      await this.open(source);
     }
   }
 
   async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    if (changes['pdf'] && this.pdf && this.canvas) {
-      await this.open(this.pdf);
+    if (changes['pdf'] && this.pdf) {
+      await this.load(this.pdf);
     }
   }
 
@@ -245,6 +251,11 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   }
 
   async load(source: DocumentSignerSource): Promise<void> {
+    if (!this.viewInitialized) {
+      this.pendingSource = source;
+      return;
+    }
+
     await this.open(source);
   }
 
@@ -415,6 +426,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
 
   private async open(source: DocumentSignerSource): Promise<void> {
     this.source = source;
+    this.cdr.detectChanges();
     this.document = await loadPdfDocument(source, this.workerSrc);
     this.fields = await this.signer.extractFields(source);
     this.pageCount = this.document.numPages;
