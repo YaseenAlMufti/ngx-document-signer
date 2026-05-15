@@ -6,7 +6,7 @@ Reusable Angular PDF creator and signer components.
 
 `PdfCreatorComponent` lets a creator browse for a PDF, preview it, page through it, zoom, draw text/date/signature boxes, and save a new PDF containing AcroForm fields at those coordinates.
 
-`PdfSignerComponent` accepts a PDF href, `Blob`, `ArrayBuffer`, or `Uint8Array`, previews the PDF, discovers the creator fields, lets the signer type text, insert today's date, or draw a signature, and emits the signed PDF bytes on save.
+`PdfSignerComponent` accepts a PDF href, `Blob`, `ArrayBuffer`, or `Uint8Array`, previews the PDF, discovers the creator fields, lets the signer type text, insert today's date, draw a signature, or type a signature with a selected font, and emits the signed PDF bytes on save.
 
 ## Usage
 
@@ -48,7 +48,10 @@ Most UI outside the PDF preview canvas can be customized with inputs:
   [source]="createdPdf"
   saveBtnLabel="Finish signing"
   signatureFieldPlaceholder="Tap to sign"
-  signatureDialogTitle="Draw your signature"
+  signatureDialogTitle="Add your signature"
+  signatureDrawModeLabel="Draw"
+  signatureTypeModeLabel="Type"
+  signatureTextPlaceholder="Type your full name"
   todayBtnTitle="Use today's date"
   [toolbarStyle]="{ background: '#fff' }"
   [primaryButtonClass]="'my-primary-button'">
@@ -56,6 +59,10 @@ Most UI outside the PDF preview canvas can be customized with inputs:
 ```
 
 Useful public methods include `openFilePicker()`, `load(source)`, `save()`, and `download(filename)`.
+
+On screens at least 1024px wide, the creator and signer previews open at `1.8x` zoom by default. Smaller screens open at `1x` to keep mobile layouts usable.
+
+Saved creator fields are visually transparent by default: generated PDF widgets have no border and no filled background. Existing supported fields that remain in the creator are also normalized to remove widget border/background styling on save.
 
 ## Flattening behavior
 
@@ -80,6 +87,25 @@ The browser input value uses the native ISO format `YYYY-MM-DD`. When the signed
 <nds-pdf-signer
   [source]="createdPdf"
   [datePdfValueFormatter]="formatDateForPdf">
+</nds-pdf-signer>
+```
+
+## Signature fields
+
+Signature fields can be completed by drawing freehand or typing a name and selecting a font. Override the available typed signature fonts with `signatureFontOptions`:
+
+```ts
+signatureFonts = [
+  { label: 'Cursive', value: 'Brush Script MT, Segoe Script, cursive' },
+  { label: 'Formal', value: 'Georgia, Times New Roman, serif' },
+  { label: 'Modern', value: 'Arial, sans-serif' },
+];
+```
+
+```html
+<nds-pdf-signer
+  [source]="createdPdf"
+  [signatureFontOptions]="signatureFonts">
 </nds-pdf-signer>
 ```
 

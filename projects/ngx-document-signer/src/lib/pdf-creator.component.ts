@@ -200,7 +200,7 @@ export class PdfCreatorComponent implements AfterViewInit, OnChanges {
   fields: DocumentSignerField[] = [];
   pageIndex = 0;
   pageCount = 0;
-  zoom = 1;
+  zoom = defaultPreviewZoom();
   tool: DocumentSignerFieldType = 'text';
   viewportWidth = 0;
   viewportHeight = 0;
@@ -493,4 +493,8 @@ function downloadBlob(blob: Blob, filename: string): void {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function defaultPreviewZoom(): number {
+  return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches ? 1.8 : 1;
 }

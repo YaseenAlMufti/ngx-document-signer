@@ -18,6 +18,7 @@ import {
   DocumentSignerClassValue,
   DocumentSignerCompletedEvent,
   DocumentSignerField,
+  DocumentSignerSignatureFontOption,
   DocumentSignerSignatureValue,
   DocumentSignerSource,
   DocumentSignerStyleValue,
@@ -99,6 +100,15 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
               [style.height.px]="toViewRect(field).height"
               (click)="openSignatureDialog(field.name)">
               <svg *ngIf="signatureDrawings[field.name]" [attr.viewBox]="viewBox(signatureDrawings[field.name])" preserveAspectRatio="xMidYMid meet">
+                <text *ngIf="typedSignature(signatureDrawings[field.name]) as text"
+                  [attr.x]="text.x"
+                  [attr.y]="text.y"
+                  [attr.font-family]="text.fontFamily"
+                  [attr.font-size]="text.fontSize"
+                  [attr.text-anchor]="text.textAnchor"
+                  [attr.dominant-baseline]="text.dominantBaseline"
+                  [attr.textLength]="text.textLength"
+                  lengthAdjust="spacingAndGlyphs">{{ text.value }}</text>
                 <path *ngFor="let path of paths(signatureDrawings[field.name])" [attr.d]="path"></path>
               </svg>
               <span *ngIf="!signatureDrawings[field.name]">{{ signatureFieldPlaceholder }}</span>
@@ -133,8 +143,18 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
             </button>
           </div>
 
+          <div class="nds-signature-mode" [ngClass]="signatureModeClass" [ngStyle]="signatureModeStyle">
+            <button type="button" [class.active]="activeSignatureMode === 'draw'" (click)="setSignatureMode('draw')"
+              [ngClass]="buttonClasses('signatureModeDraw')"
+              [ngStyle]="buttonStyles('signatureModeDraw')">{{ signatureDrawModeLabel }}</button>
+            <button type="button" [class.active]="activeSignatureMode === 'type'" (click)="setSignatureMode('type')"
+              [ngClass]="buttonClasses('signatureModeType')"
+              [ngStyle]="buttonStyles('signatureModeType')">{{ signatureTypeModeLabel }}</button>
+          </div>
+
           <div class="nds-modal-pad" [ngClass]="modalPadClass" [ngStyle]="modalPadStyle">
             <svg #modalSignatureSvg
+              *ngIf="activeSignatureMode === 'draw'; else typedSignatureTemplate"
               [attr.viewBox]="viewBox(activeSignatureDrawing)"
               preserveAspectRatio="none"
               (pointerdown)="startModalSignature($event)"
@@ -144,6 +164,28 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
               (pointercancel)="endModalSignature()">
               <path *ngFor="let path of paths(activeSignatureDrawing)" [attr.d]="path"></path>
             </svg>
+            <ng-template #typedSignatureTemplate>
+              <div class="nds-typed-signature">
+                <div class="nds-typed-controls">
+                  <select [(ngModel)]="activeSignatureFontFamily" [attr.aria-label]="signatureFontAriaLabel">
+                    <option *ngFor="let font of signatureFontOptions" [ngValue]="font.value">{{ font.label }}</option>
+                  </select>
+                  <input type="text" [(ngModel)]="activeSignatureText" [placeholder]="signatureTextPlaceholder"
+                    [attr.aria-label]="signatureTextAriaLabel" />
+                </div>
+                <svg [attr.viewBox]="viewBox(typedSignaturePreview())" preserveAspectRatio="xMidYMid meet">
+                  <text *ngIf="typedSignature(typedSignaturePreview()) as text"
+                    [attr.x]="text.x"
+                    [attr.y]="text.y"
+                    [attr.font-family]="text.fontFamily"
+                    [attr.font-size]="text.fontSize"
+                    [attr.text-anchor]="text.textAnchor"
+                    [attr.dominant-baseline]="text.dominantBaseline"
+                    [attr.textLength]="text.textLength"
+                    lengthAdjust="spacingAndGlyphs">{{ text.value }}</text>
+                </svg>
+              </div>
+            </ng-template>
           </div>
         </div>
       </div>
@@ -169,6 +211,7 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
     .nds-signature { display: block; overflow: hidden; padding: 0; color: #0f766e; font-weight: 700; }
     .nds-signature svg { width: 100%; height: 100%; pointer-events: none; }
     .nds-signature path, .nds-modal-pad path { fill: none; stroke: #111827; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+    .nds-signature text, .nds-modal-pad text { fill: #111827; }
     .nds-signature span { position: absolute; inset: 0; display: grid; place-items: center; }
     .nds-modal-backdrop { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: stretch; justify-content: center; background: rgba(15, 23, 42, .58); padding: 12px; }
     .nds-modal { width: min(900px, 100%); min-height: min(520px, calc(100vh - 24px)); display: flex; flex-direction: column; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,.35); }
@@ -178,13 +221,21 @@ import { loadPdfDocument, renderPdfPage } from './pdf-viewer-loader';
     .nds-modal-toolbar .icon svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
     .nds-modal-toolbar .icon.primary { background: #0f766e; border-color: #0f766e; color: #fff; }
     .nds-modal-toolbar .icon.danger { color: #b42318; }
+    .nds-signature-mode { display: flex; gap: 8px; padding: 10px; border-bottom: 1px solid #d1d5db; background: #f8fafc; }
+    .nds-signature-mode button.active { background: #0f766e; color: #fff; border-color: #0f766e; }
     .nds-modal-pad { flex: 1; padding: 14px; background: #eef2f3; }
     .nds-modal-pad svg { width: 100%; height: 100%; min-height: 360px; background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; touch-action: none; }
+    .nds-typed-signature { display: grid; grid-template-rows: auto 1fr; gap: 12px; height: 100%; min-height: 360px; }
+    .nds-typed-controls { display: grid; grid-template-columns: minmax(140px, 220px) 1fr; gap: 10px; }
+    .nds-typed-controls select, .nds-typed-controls input { box-sizing: border-box; width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 12px; font: inherit; background: #fff; }
+    .nds-typed-signature svg { min-height: 300px; }
     @media (max-width: 720px) {
       .nds-modal-backdrop { padding: 0; }
       .nds-modal { width: 100%; min-height: 100vh; border-radius: 0; }
       .nds-modal-pad { padding: 10px; }
       .nds-modal-pad svg { min-height: calc(100vh - 86px); }
+      .nds-typed-controls { grid-template-columns: 1fr; }
+      .nds-typed-signature { min-height: calc(100vh - 130px); }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -212,6 +263,12 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() signatureFieldPlaceholder = 'Sign';
   @Input() signatureDialogTitle = 'Signature';
   @Input() signatureDialogAriaLabel = 'Draw signature';
+  @Input() signatureDrawModeLabel = 'Draw';
+  @Input() signatureTypeModeLabel = 'Type';
+  @Input() signatureFontAriaLabel = 'Signature font';
+  @Input() signatureTextAriaLabel = 'Signature text';
+  @Input() signatureTextPlaceholder = 'Type your full name';
+  @Input() signatureFontOptions: DocumentSignerSignatureFontOption[] = defaultSignatureFontOptions();
   @Input() clearSignatureBtnTitle = 'Clear signature';
   @Input() clearSignatureBtnAriaLabel = 'Clear signature';
   @Input() acceptSignatureBtnTitle = 'Accept signature';
@@ -236,6 +293,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() modalToolbarClass?: DocumentSignerClassValue;
   @Input() modalTitleClass?: DocumentSignerClassValue;
   @Input() modalPadClass?: DocumentSignerClassValue;
+  @Input() signatureModeClass?: DocumentSignerClassValue;
   @Input() shellStyle?: DocumentSignerStyleValue;
   @Input() toolbarStyle?: DocumentSignerStyleValue;
   @Input() stageStyle?: DocumentSignerStyleValue;
@@ -256,6 +314,7 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   @Input() modalToolbarStyle?: DocumentSignerStyleValue;
   @Input() modalTitleStyle?: DocumentSignerStyleValue;
   @Input() modalPadStyle?: DocumentSignerStyleValue;
+  @Input() signatureModeStyle?: DocumentSignerStyleValue;
   @Output() completed = new EventEmitter<DocumentSignerCompletedEvent>();
   @ViewChild('canvas') canvas?: ElementRef<HTMLCanvasElement>;
   @ViewChild('modalSignatureSvg') modalSignatureSvg?: ElementRef<SVGSVGElement>;
@@ -264,10 +323,13 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   textValues: Record<string, string> = {};
   signatureDrawings: Record<string, SignatureDrawing> = {};
   activeSignatureDrawing: SignatureDrawing = emptyDrawing();
+  activeSignatureMode: SignatureMode = 'draw';
+  activeSignatureText = '';
+  activeSignatureFontFamily = defaultSignatureFontOptions()[0].value;
   activeSignatureFieldName?: string;
   pageIndex = 0;
   pageCount = 0;
-  zoom = 1;
+  zoom = defaultPreviewZoom();
   viewportWidth = 0;
   viewportHeight = 0;
 
@@ -324,6 +386,10 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   openSignatureDialog(fieldName: string): void {
     this.activeSignatureFieldName = fieldName;
     this.activeSignatureDrawing = cloneDrawing(this.signatureDrawings[fieldName] ?? emptyDrawing());
+    const typed = this.activeSignatureDrawing.text;
+    this.activeSignatureMode = typed ? 'type' : 'draw';
+    this.activeSignatureText = typed?.value ?? '';
+    this.activeSignatureFontFamily = typed?.fontFamily ?? this.signatureFontOptions[0]?.value ?? defaultSignatureFontOptions()[0].value;
     this.cdr.markForCheck();
     setTimeout(() => this.resizeActiveDrawing());
   }
@@ -331,8 +397,17 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
   closeSignatureDialog(): void {
     this.activeSignatureFieldName = undefined;
     this.activeSignatureDrawing = emptyDrawing();
+    this.activeSignatureMode = 'draw';
+    this.activeSignatureText = '';
     this.isDrawingSignature = false;
     this.cdr.markForCheck();
+  }
+
+  setSignatureMode(mode: SignatureMode): void {
+    this.activeSignatureMode = mode;
+    if (mode === 'draw') {
+      setTimeout(() => this.resizeActiveDrawing());
+    }
   }
 
   startModalSignature(event: PointerEvent): void {
@@ -372,7 +447,9 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
       return;
     }
 
-    const cropped = cropDrawing(this.activeSignatureDrawing);
+    const cropped = this.activeSignatureMode === 'type'
+      ? typedDrawing(this.activeSignatureText, this.activeSignatureFontFamily)
+      : cropDrawing(this.activeSignatureDrawing);
     if (!cropped) {
       this.clearActiveSignature();
       return;
@@ -440,6 +517,14 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
     return drawing?.strokes.map(strokeToPath) ?? [];
   }
 
+  typedSignature(drawing: SignatureDrawing | undefined): SignatureText | undefined {
+    return drawing?.text;
+  }
+
+  typedSignaturePreview(): SignatureDrawing {
+    return typedDrawing(this.activeSignatureText, this.activeSignatureFontFamily) ?? emptyTypedDrawing(this.activeSignatureFontFamily);
+  }
+
   buttonClasses(button: SignerButtonName): DocumentSignerClassValue[] {
     const specific = this.buttonClassFor(button);
     const classes: DocumentSignerClassValue[] = [];
@@ -467,6 +552,8 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
       acceptSignature: this.acceptSignatureButtonClass,
       clearSignature: this.clearSignatureButtonClass,
       today: this.todayButtonClass,
+      signatureModeDraw: undefined,
+      signatureModeType: undefined,
     }[button];
   }
 
@@ -480,6 +567,8 @@ export class PdfSignerComponent implements AfterViewInit, OnChanges {
       acceptSignature: this.acceptSignatureButtonStyle,
       clearSignature: this.clearSignatureButtonStyle,
       today: this.todayButtonStyle,
+      signatureModeDraw: undefined,
+      signatureModeType: undefined,
     }[button];
   }
 
@@ -554,10 +643,42 @@ interface SignatureDrawing {
   width: number;
   height: number;
   strokes: SignaturePoint[][];
+  text?: SignatureText;
 }
+
+interface SignatureText {
+  value: string;
+  fontFamily: string;
+  fontSize: number;
+  x: number;
+  y: number;
+  textAnchor: 'middle';
+  dominantBaseline: 'middle';
+  textLength: number;
+}
+
+type SignatureMode = 'draw' | 'type';
 
 function emptyDrawing(): SignatureDrawing {
   return { width: 900, height: 360, strokes: [] };
+}
+
+function emptyTypedDrawing(fontFamily: string): SignatureDrawing {
+  return {
+    width: 900,
+    height: 360,
+    strokes: [],
+    text: {
+      value: '',
+      fontFamily,
+      fontSize: 140,
+      x: 450,
+      y: 190,
+      textAnchor: 'middle',
+      dominantBaseline: 'middle',
+      textLength: 720,
+    },
+  };
 }
 
 function cloneDrawing(drawing: SignatureDrawing): SignatureDrawing {
@@ -565,6 +686,7 @@ function cloneDrawing(drawing: SignatureDrawing): SignatureDrawing {
     width: drawing.width,
     height: drawing.height,
     strokes: drawing.strokes.map((stroke) => stroke.map((point) => ({ ...point }))),
+    text: drawing.text ? { ...drawing.text } : undefined,
   };
 }
 
@@ -602,12 +724,30 @@ function cropDrawing(drawing: SignatureDrawing): SignatureDrawing | undefined {
   };
 }
 
+function typedDrawing(value: string, fontFamily: string): SignatureDrawing | undefined {
+  const text = value.trim();
+  if (!text) {
+    return undefined;
+  }
+
+  const drawing = emptyTypedDrawing(fontFamily);
+  drawing.text = {
+    ...drawing.text!,
+    value: text,
+    textLength: Math.min(780, Math.max(260, text.length * 42)),
+  };
+  return drawing;
+}
+
 async function drawingToPng(drawing: SignatureDrawing): Promise<string> {
   const width = 1800;
   const height = Math.max(1, Math.round((drawing.height / drawing.width) * width));
   const paths = drawing.strokes.map((stroke) => `<path d="${strokeToPath(stroke)}" />`).join('');
+  const text = drawing.text
+    ? `<text x="${drawing.text.x}" y="${drawing.text.y}" font-family="${escapeXml(drawing.text.fontFamily)}" font-size="${drawing.text.fontSize}" text-anchor="${drawing.text.textAnchor}" dominant-baseline="${drawing.text.dominantBaseline}" textLength="${drawing.text.textLength}" lengthAdjust="spacingAndGlyphs">${escapeXml(drawing.text.value)}</text>`
+    : '';
   const strokeWidth = Math.max(4, Math.min(7, Math.min(drawing.width, drawing.height) * 0.055));
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${drawing.width} ${drawing.height}" width="${width}" height="${height}"><g fill="none" stroke="#000" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</g></svg>`;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${drawing.width} ${drawing.height}" width="${width}" height="${height}"><g fill="#000">${text}</g><g fill="none" stroke="#000" stroke-width="${strokeWidth}" stroke-linecap="round" stroke-linejoin="round">${paths}</g></svg>`;
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }));
 
   try {
@@ -631,7 +771,25 @@ function loadImage(url: string): Promise<HTMLImageElement> {
   });
 }
 
-type SignerButtonName = 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'today' | 'acceptSignature' | 'clearSignature';
+type SignerButtonName = 'previous' | 'next' | 'zoomOut' | 'zoomIn' | 'save' | 'today' | 'acceptSignature' | 'clearSignature' | 'signatureModeDraw' | 'signatureModeType';
+
+function defaultSignatureFontOptions(): DocumentSignerSignatureFontOption[] {
+  return [
+    { label: 'Cursive', value: 'Brush Script MT, Segoe Script, cursive' },
+    { label: 'Serif', value: 'Georgia, Times New Roman, serif' },
+    { label: 'Classic', value: 'Times New Roman, serif' },
+    { label: 'Clean', value: 'Arial, sans-serif' },
+  ];
+}
+
+function escapeXml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
 function defaultDateValueFormatter(date: Date): string {
   const year = date.getFullYear();
@@ -655,4 +813,8 @@ function downloadBlob(blob: Blob, filename: string): void {
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function defaultPreviewZoom(): number {
+  return typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches ? 1.8 : 1;
 }

@@ -39,6 +39,11 @@ export interface DocumentSignerFillOptions {
   partialFlatten?: boolean;
 }
 
+export interface DocumentSignerSignatureFontOption {
+  label: string;
+  value: string;
+}
+
 export type DocumentSignerClassValue = string | string[] | Set<string> | { [klass: string]: unknown };
 
 export type DocumentSignerStyleValue = { [klass: string]: unknown };

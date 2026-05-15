@@ -1,7 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DocumentSignerCompletedEvent, DocumentSignerSaveEvent, PdfCreatorComponent, PdfSignerComponent } from 'ngx-document-signer';
+import {
+  DocumentSignerCompletedEvent,
+  DocumentSignerSaveEvent,
+  DocumentSignerSignatureFontOption,
+  PdfCreatorComponent,
+  PdfSignerComponent,
+} from 'ngx-document-signer';
 
 @Component({
   selector: 'app-root',
@@ -25,6 +31,12 @@ export class AppComponent {
   showCreatorFieldTools = true;
   showSaveButtons = true;
   partialFlattenOnSave = false;
+  signatureFonts: DocumentSignerSignatureFontOption[] = [
+    { label: 'Cursive', value: 'Brush Script MT, Segoe Script, cursive' },
+    { label: 'Formal', value: 'Georgia, Times New Roman, serif' },
+    { label: 'Classic', value: 'Times New Roman, serif' },
+    { label: 'Modern', value: 'Arial, sans-serif' },
+  ];
   activePalette = 'teal';
   palettes: Record<string, DemoPalette> = {
     teal: {

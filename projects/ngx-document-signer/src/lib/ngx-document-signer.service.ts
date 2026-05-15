@@ -4,6 +4,7 @@ import {
   PDFDocument,
   PDFField,
   PDFForm,
+  PDFName,
   PDFPage,
   PDFRef,
   PDFSignature,
@@ -43,6 +44,7 @@ export class NgxDocumentSignerService {
 
     for (const field of fields) {
       if (existingFieldNames.has(field.name)) {
+        this.clearFieldChrome(form, form.getField(field.name));
         continue;
       }
 
@@ -54,11 +56,13 @@ export class NgxDocumentSignerService {
         y: field.y,
         width: field.width,
         height: field.height,
-        borderWidth: field.type === 'date' ? 0 : 1,
-        borderColor: field.type === 'signature' ? rgb(0.05, 0.35, 0.7) : rgb(0.2, 0.2, 0.2),
+        borderWidth: 0,
+        borderColor: undefined,
+        backgroundColor: undefined,
         textColor: rgb(0, 0, 0),
       });
       this.setTextFieldFontSize(pdfField, field.height);
+      this.clearFieldChrome(form, pdfField);
       existingFieldNames.add(field.name);
     }
 
@@ -76,6 +80,7 @@ export class NgxDocumentSignerService {
     const form = document.getForm();
     const fields = this.extractFieldsFromDocument(document);
     const fieldsToFlatten = new Set<string>();
+    const signatureFieldsToRemove = new Set<string>();
 
     for (const item of textValues) {
       const field = form.getField(item.fieldName);
@@ -111,11 +116,13 @@ export class NgxDocumentSignerService {
         width: imageRect.width,
         height: imageRect.height,
       });
-      const formField = form.getField(field.name);
-      if (formField instanceof PDFTextField) {
-        formField.setText('Signed');
+      signatureFieldsToRemove.add(field.name);
+    }
+
+    for (const field of form.getFields()) {
+      if (signatureFieldsToRemove.has(field.getName())) {
+        this.removeField(form, field);
       }
-      fieldsToFlatten.add(field.name);
     }
 
     if (options.partialFlatten) {
@@ -146,6 +153,17 @@ export class NgxDocumentSignerService {
 
       this.removeFieldWithoutAppearance(form, field);
     }
+  }
+
+  private clearFieldChrome(form: PDFForm, field: PDFField): void {
+    for (const widget of field.acroField.getWidgets()) {
+      widget.getOrCreateBorderStyle().setWidth(0);
+      const appearance = widget.getOrCreateAppearanceCharacteristics();
+      appearance.dict.delete(PDFName.of('BG'));
+      appearance.dict.delete(PDFName.of('BC'));
+    }
+
+    form.markFieldAsDirty(field.ref);
   }
 
   private removeFieldWithoutAppearance(form: PDFForm, field: PDFField): void {
