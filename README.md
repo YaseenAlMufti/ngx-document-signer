@@ -2,6 +2,19 @@
 
 Angular workspace for `ngx-document-signer`, a reusable package that provides a PDF form creator and PDF signer.
 
+## Features
+
+- Preview PDFs from a file picker, URL, `Blob`, `ArrayBuffer`, or `Uint8Array`.
+- Navigate pages and control zoom while preserving field state.
+- Add text, date, and signature fields to new or existing PDF forms.
+- Delete generated or existing PDF form fields from the creator UI.
+- Sign PDFs with typed text fields, date fields, and drawn or typed signatures.
+- Open a mobile-friendly signature popup with draw, type, accept, and clear controls.
+- Save or download the updated PDF as bytes for upload by the host application.
+- Customize toolbar buttons, labels, CSS classes, visibility, and common actions.
+- Call public component methods such as `browse()`, `load()`, `save()`, and `download()` programmatically.
+- Choose full flattening or partial flattening for only completed fields on save.
+
 ## Build
 
 ```bash
@@ -10,6 +23,16 @@ npm run build
 ```
 
 The library builds into `dist/ngx-document-signer`.
+
+## Demo
+
+The demo app can be built locally:
+
+```bash
+npm run build:demo
+```
+
+The public hosted demo is available at https://ngx-document-signer.web.app.
 
 ## Package API
 
